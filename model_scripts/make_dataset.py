@@ -115,8 +115,6 @@ def skip_nru(text):
     return "fin peu audible" in text or "BEGAIEMENT" in text
 
 
-# ISO 639-3 code -> predicate on the raw transcript. True means drop the clip.
-# Languages without an entry keep every clip.
 SKIP_FILTERS = {
     "nru": skip_nru,
 }

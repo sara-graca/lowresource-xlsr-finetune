@@ -185,7 +185,7 @@ if __name__ == "__main__":
         remove_columns=val_data.column_names,
     )
 
-    vocab = set(vocab_train["vocab"]) | set(vocab_val["vocab"])
+    vocab = sorted(set(vocab_train["vocab"]) | set(vocab_val["vocab"]))
     vocab = {v: k for k, v in enumerate(vocab)}
     vocab["[UNK]"] = len(vocab)
     vocab["[PAD]"] = len(vocab)

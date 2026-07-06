@@ -1,0 +1,11 @@
+torch==2.5.1
+torchaudio==2.5.1
+torchvision==0.20.1
+transformers==4.47.1
+datasets==3.2.0
+evaluate==0.4.6
+numpy==1.26.4
+pandas==2.2.3
+librosa==0.10.2.post1
+soundfile==0.12.1
+pydub

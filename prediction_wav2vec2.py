@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-prediction_wav2vec.py — Transcribe audio with a fine-tuned Wav2Vec2 model.
+prediction_wav2vec2.py — Transcribe audio with a fine-tuned Wav2Vec2 model.
 
 For each wav file in --audio_dir_path:
   1. resample to 16 kHz
@@ -10,7 +10,7 @@ For each wav file in --audio_dir_path:
 
 USAGE
 -----
-    python prediction_wav2vec.py \
+    python prediction_wav2vec2.py \
         --audio_dir_path /path/to/wav \
         --model_path     /path/to/model \
         --language       tdh \

@@ -1,7 +1,7 @@
-# Wav2Vec2 ASR Pipeline for Low-Resource Languages
+# ASR Pipeline for Low-Resource Languages
 
 A toolkit for building automatic speech recognition (ASR) models for
-under-documented languages, built around fine-tuning XLSR-Wav2Vec2. It covers
+under-documented languages, built around fine-tuning XLS-R. It covers
 the full workflow: turning raw recordings + annotations into a clean training
 dataset, fine-tuning the model, and running inference on new audio with output
 formats ready for linguistic annotation tools.

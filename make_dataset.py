@@ -37,20 +37,24 @@ import torchaudio
 
 def extract_information(xml_file):
     information = {}
-    tree = et.parse(xml_file)
-    root = tree.getroot()
-    if root.findall("S"):
-        for child in root.findall("S"):
-            id = child.attrib.get("id")
-            transcript = child.find("FORM").text
-            timecode = child.find("AUDIO").attrib
-            information[transcript] = [timecode["start"], timecode["end"], id]
-    else:
-        for word in root.findall("W"):
-            id = word.attrib.get("id")
-            transcript = word.find("FORM").text
-            timecode = word.find("AUDIO").attrib
-            information[transcript] = [timecode["start"], timecode["end"], id]
+    skipped = 0
+    root = et.parse(xml_file).getroot()
+    nodes = root.findall("S") or root.findall("W")
+    for child in nodes:
+        sent_id = child.attrib.get("id")
+        form = child.find("FORM")
+        audio = child.find("AUDIO")
+        if form is None or form.text is None or audio is None:
+            skipped += 1
+            continue
+        timecode = audio.attrib
+        if "start" not in timecode or "end" not in timecode:
+            skipped += 1
+            continue
+        information[sent_id] = [form.text, timecode["start"], timecode["end"]]
+    if skipped:
+        print(f"  [WARN] {Path(xml_file).name}: skipped {skipped} sentence(s) "
+              f"without timecode or text")
     return information
 
 
@@ -114,11 +118,9 @@ def skip_nru(text):
     """Na: drop clips marked as barely audible or stuttered."""
     return "fin peu audible" in text or "BEGAIEMENT" in text
 
-
 SKIP_FILTERS = {
     "nru": skip_nru,
 }
-
 
 def get_skip_filter(language):
     """Return the clip-skipping predicate for an ISO 639-3 code, or a no-op

@@ -94,13 +94,35 @@ def normalize_nru(text):
     return clean_markup(text)
 
 
+def normalize_jya(text):
+    HAN = r'[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\U00020000-\U0002FA1F]'
+    _APOS = '\ue000'
+    text = re.sub(r'@(\S+)', lambda m: '@' + m.group(1).replace("'", _APOS), text)
+    text = re.sub(r'@(\S+)\s*' + HAN + r'+', r'\1', text)
+    text = re.sub(HAN + r'+', '', text)
+    text = text.replace('@', '')
+    text = text.replace('X', '')
+    text = re.sub(r'-{2,}', ' ', text)
+    text = text.replace('-', '')
+    text = re.sub(r'[.…]+', ' ', text)
+    text = text.replace('\u0261', 'g')
+    text = re.sub(r'["“”\'=_/\\&#%|ǀ+<>:：（），？\ufeff\u200b\u200c\u200d]', '', text)
+    text = re.sub(r'\d+', '', text)
+    text = text.lower()
+    text = clean_markup(text)
+    text = re.sub(r'[()\[\]{}]', '', text)
+    text = text.replace(_APOS, "'")
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
 # ISO 639-3 code -> normalizer. To add a language, write a normalize_<code>
 # that ends by calling clean_markup, and add one entry here.
 NORMALIZERS = {
     "tdh": normalize_tdh,
     "nru": normalize_nru,
+    "jya": normalize_jya,
 }
-
 
 def get_normalizer(language):
     """Return the normalizer for an ISO 639-3 code, or the general cleanup
@@ -144,7 +166,7 @@ def create_audio_tsv(args):
 
     tsv_out = open(out_dir / "all.tsv", "wt")
     writer = csv.writer(tsv_out, delimiter="\t")
-    writer.writerow(["path", "sentence"])
+    writer.writerow(["path", "sentence", "duration", "recording"])
 
     total_dur = 0.0
     problem = ""
@@ -174,7 +196,7 @@ def create_audio_tsv(args):
                 waveform = torchaudio.transforms.Resample(sr, 16_000)(waveform)
                 sr = 16_000
 
-            for transcript, (start, end, sent_id) in info.items():
+            for sent_id, (transcript, start, end) in info.items():
                 if skip(transcript):
                     continue
                 transcript = normalizer(transcript)
@@ -190,7 +212,7 @@ def create_audio_tsv(args):
 
                 clip_name = f"{wav.stem}_{sent_id}.wav"
                 torchaudio.save(str(clips_dir / clip_name), clip, sr)
-                writer.writerow([clip_name, transcript])
+                writer.writerow([clip_name, transcript, f"{dur:.3f}", wav.stem])
                 total_dur += dur
 
         except Exception as e:
@@ -234,9 +256,10 @@ def create_dataset(args):
 
     corpus["_split"] = corpus["_recording"].apply(split_name)
 
-    train = corpus[corpus["_split"] == "train"].drop(columns=["_recording", "_split"])
-    val = corpus[corpus["_split"] == "valid"].drop(columns=["_recording", "_split"])
-    test = corpus[corpus["_split"] == "test"].drop(columns=["_recording", "_split"])
+    cols = ["path", "sentence"]
+    train = corpus[corpus["_split"] == "train"][cols]
+    val = corpus[corpus["_split"] == "valid"][cols]
+    test = corpus[corpus["_split"] == "test"][cols]
 
     train.to_csv(path + 'train.tsv', index=False, sep='\t')
     val.to_csv(path + 'valid.tsv', index=False, sep='\t')

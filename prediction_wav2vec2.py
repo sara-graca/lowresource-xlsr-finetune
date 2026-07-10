@@ -251,7 +251,7 @@ def tsv2eaf(tsv_file_path, language, media_file=None, eaf_file_path=None, words=
 
     lang_attr = f' LANG_REF="{_esc_attr(language)}"' if language else ""
     lines.append(
-        f'    <TIER{lang_attr} LINGUISTIC_TYPE_REF="default-lt" TIER_ID="tx">'
+        f'    <TIER{lang_attr} LINGUISTIC_TYPE_REF="tx" TIER_ID="tx">'
     )
     for aid, ts1, ts2, value in annotations:
         lines.extend([
@@ -266,7 +266,7 @@ def tsv2eaf(tsv_file_path, language, media_file=None, eaf_file_path=None, words=
 
     if words and word_annotations:
         lines.append(
-            '    <TIER LINGUISTIC_TYPE_REF="symsub" PARENT_REF="tx" TIER_ID="word">'
+            '    <TIER LINGUISTIC_TYPE_REF="word" PARENT_REF="tx" TIER_ID="word">'
         )
         for aid, ref_id, prev_id, value in word_annotations:
             prev_attr = f' PREVIOUS_ANNOTATION="{prev_id}"' if prev_id else ""
@@ -282,12 +282,12 @@ def tsv2eaf(tsv_file_path, language, media_file=None, eaf_file_path=None, words=
 
     lines.append(
         '    <LINGUISTIC_TYPE GRAPHIC_REFERENCES="false"'
-        ' LINGUISTIC_TYPE_ID="default-lt" TIME_ALIGNABLE="true"/>'
+        ' LINGUISTIC_TYPE_ID="tx" TIME_ALIGNABLE="true"/>'
     )
     if words and word_annotations:
         lines.append(
             '    <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Subdivision"'
-            ' GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="symsub"'
+            ' GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="word"'
             ' TIME_ALIGNABLE="false"/>'
         )
     if language:
